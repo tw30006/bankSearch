@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 
-const searchBank = ({ headOfficeList }) => {
+const searchBank = ({ headOfficeList, processedBankList }) => {
   console.log(headOfficeList);
   const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("");
   const [isOpenHeadOffice, setIsOpenHeadOffice] = useState(false);
+  const [isOpenBranch, setIsOpenBranch] = useState(false);
   const [filterHeadOffice, setFilterHeadOffice] = useState([]);
+  const [filterBranches, setFilterBranches] = useState([]);
 
   const handleSelectOption = (headOffice) => {
     setSelectedHeadOffice(`${headOffice.code} ${headOffice.bankName}`);
@@ -15,6 +18,14 @@ const searchBank = ({ headOfficeList }) => {
   }, [headOfficeList]);
   const handleHeadOfficeList = () => {
     setIsOpenHeadOffice(!isOpenHeadOffice);
+  };
+
+  const handleSelectBrnanch = (branch) => {
+    setSelectedBranch(branch);
+    setIsOpenBranch(false);
+  };
+  const handleBranchList = () => {
+    setIsOpenBranch(!isOpenBranch);
   };
 
   const handleInputHeadOffice = (e) => {
@@ -31,6 +42,32 @@ const searchBank = ({ headOfficeList }) => {
     setFilterHeadOffice(next);
     setIsOpenHeadOffice(true);
   };
+
+  const handleFilterBranch = () => {
+    const headOfficeName = selectedHeadOffice.split(" ")[1];
+    console.log(headOfficeName);
+    const branches = processedBankList.filter((bank) => {
+      return bank.headOffice === headOfficeName;
+    });
+    return branches;
+  };
+  useEffect(() => {
+    if (selectedHeadOffice) {
+      setFilterBranches(handleFilterBranch);
+      setIsOpenBranch(true);
+    }
+    console.log(filterBranches);
+  }, [selectedHeadOffice]);
+
+  const handleSelectedBranch = () => {
+    setSelectedBranch(selectedBranch);
+    setIsOpenBranch(false);
+  };
+  useEffect(() => {
+    if (selectedBranch) {
+      handleSelectedBranch;
+    }
+  }, [selectedBranch]);
   return (
     <>
       <div className="flex justify-center my-3">
@@ -78,13 +115,35 @@ const searchBank = ({ headOfficeList }) => {
         <section>
           <label htmlFor="branchName">分行名稱</label>
           <div className="relative w-[10rem]">
-            <button
-              className="flex w-full items-center justify-between rounded bg-white p-2 ring-1 ring-gray-300"
-              id="branchName"
-            ></button>
-            <ul className="z-2 absolute mt-1 w-full rounded bg-gray-50 ring-1 ring-gray-300 max-h-60 overflow-y-auto">
-              <li className="cursor-pointer p-2 hover:bg-gray-200"></li>
-            </ul>
+            <div className="flex w-full items-center justify-between rounded bg-white p-2 ring-1 ring-gray-300">
+              <input
+                className="w-full outline-none"
+                id="branchName"
+                value={selectedBranch}
+              />
+              <span
+                className="material-symbols-outlined"
+                onClick={() => handleBranchList()}
+              >
+                {isOpenBranch ? "stat_1" : "stat_minus_1"}
+              </span>
+            </div>
+
+            {isOpenBranch && (
+              <ul className="z-2 absolute mt-1 w-full rounded bg-gray-50 ring-1 ring-gray-300 max-h-60 overflow-y-auto">
+                {filterBranches.map((branch) => {
+                  return (
+                    <li
+                      className="cursor-pointer p-2 hover:bg-gray-200"
+                      key={branch.branchCode}
+                      onClick={() => handleSelectBrnanch(branch.branchOffice)}
+                    >
+                      {branch.branchOffice}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </section>
       </div>

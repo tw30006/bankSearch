@@ -1,7 +1,7 @@
-import Header from './layout/Header';
-import SearchBank from './components/SearchBank';
-import Papa from 'papaparse';
-import { useEffect, useState } from 'react';
+import Header from "./layout/Header";
+import SearchBank from "./components/SearchBank";
+import Papa from "papaparse";
+import { useEffect, useState } from "react";
 
 //data現在是一包大資料
 //
@@ -14,7 +14,7 @@ function App() {
 
   //這裡處理csv轉json
   const getBankData = () => {
-    Papa.parse('/data.csv', {
+    Papa.parse("/data.csv", {
       download: true,
       header: true,
       skipEmptyLines: true,
@@ -32,13 +32,18 @@ function App() {
     const regex =
       /^(.+?(銀行|公司|有限公司|商業銀行|農會|信用合作社|信用部))(.+)?$/;
     const handleBanks = bankData.map((bank) => {
-      const match = bank['機構名稱'].match(regex);
+      const cleanedOrgName = String(bank["機構名稱"] || "").replace(
+        /股份有限公司/g,
+        ""
+      );
+      const match = cleanedOrgName.match(regex);
       return {
-        headOffice: match?.[1] || '',
-        branchOffice: match?.[3] || '',
-        headOfficeCode: bank['總機構代號'],
-        address: bank['地址'],
-        tel: bank['電話'],
+        headOffice: match?.[1] || "",
+        branchOffice: match?.[3] || "",
+        headOfficeCode: bank["總機構代號"],
+        branchCode: bank["機構代號"],
+        address: bank["地址"],
+        tel: bank["電話"],
       };
     });
     return handleBanks;
@@ -56,7 +61,6 @@ function App() {
       processedData.forEach((bank) => {
         return uniqueMap.set(bank.headOfficeCode, bank.headOffice);
       });
-      // console.log(uniqueMap);
 
       const headOfficeArr = Array.from(uniqueMap, ([code, bankName]) => ({
         code,
@@ -69,7 +73,10 @@ function App() {
   return (
     <>
       <Header />
-      <SearchBank headOfficeList={headOfficeList} />
+      <SearchBank
+        headOfficeList={headOfficeList}
+        processedBankList={processedBankList}
+      />
     </>
   );
 }
