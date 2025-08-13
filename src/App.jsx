@@ -1,5 +1,6 @@
 import Header from "./layout/Header";
 import SearchBank from "./components/SearchBank";
+import BankDetail from "./components/BankDetail";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 
@@ -10,7 +11,8 @@ function App() {
   const [bankData, setbankData] = useState(null);
   const [processedBankList, setProcessedBankList] = useState([]);
   const [headOfficeList, setHeadOfficeList] = useState([]);
-  // const [selectedBranch, setSelectedBranch] = useState([]);
+  const [selectedBank, setSelectedBank] = useState(null);
+  const [selectedBankDetail, setSelectedBankDetail] = useState(null);
 
   //這裡處理csv轉json
   const getBankData = () => {
@@ -51,8 +53,6 @@ function App() {
 
   // console.log(uniqueBankCodes);
 
-  // const handleBranch = () => {};
-
   useEffect(() => {
     if (bankData) {
       const processedData = defineBankData();
@@ -70,13 +70,34 @@ function App() {
     }
   }, [bankData]);
 
+  const handleSelectedBank = (bank) => {
+    setSelectedBank(bank);
+  };
+
+  const handleBankDetail = (bankList, selectedBank) => {
+    const bankDetail = bankList.find((bank) => {
+      return (
+        bank.headOffice === selectedBank.headOffice &&
+        bank.branchOffice === selectedBank.branch
+      );
+    });
+    setSelectedBankDetail(bankDetail);
+  };
+  useEffect(() => {
+    if (selectedBank && processedBankList) {
+      handleBankDetail(processedBankList, selectedBank);
+    }
+  }, [processedBankList, selectedBank]);
+
   return (
     <>
       <Header />
       <SearchBank
         headOfficeList={headOfficeList}
         processedBankList={processedBankList}
+        onSelectedBank={handleSelectedBank}
       />
+      <BankDetail bankDetail={selectedBankDetail} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const searchBank = ({ headOfficeList, processedBankList }) => {
+const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
   console.log(headOfficeList);
   const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("");
@@ -66,6 +66,21 @@ const searchBank = ({ headOfficeList, processedBankList }) => {
   useEffect(() => {
     if (selectedBranch) {
       handleSelectedBranch;
+    }
+  }, [selectedBranch]);
+
+  const handleSelectedBankData = (selectedBank, selectedBranch) => {
+    const headOfficeCode = selectedBank.split(" ")[0];
+    const headOfficeName = selectedBank.split(" ")[1];
+    onSelectedBank({
+      headOffice: headOfficeName,
+      headOfficeCode: headOfficeCode,
+      branch: selectedBranch,
+    });
+  };
+  useEffect(() => {
+    if (selectedHeadOffice && selectedBranch) {
+      handleSelectedBankData(selectedHeadOffice, selectedBranch);
     }
   }, [selectedBranch]);
   return (
