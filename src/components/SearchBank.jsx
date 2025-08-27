@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 
 const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
-  console.log(headOfficeList);
+  // console.log(headOfficeList);
   const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
-  const [selectedBranch, setSelectedBranch] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState({});
   const [isOpenHeadOffice, setIsOpenHeadOffice] = useState(false);
   const [isOpenBranch, setIsOpenBranch] = useState(false);
   const [filterHeadOffice, setFilterHeadOffice] = useState([]);
@@ -21,7 +21,12 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
   };
 
   const handleSelectBrnanch = (branch) => {
-    setSelectedBranch(branch);
+    console.log(branch);
+
+    setSelectedBranch({
+      branch: branch.branchOffice,
+      branchCode: branch.branchCode,
+    });
     setIsOpenBranch(false);
   };
   const handleBranchList = () => {
@@ -45,7 +50,7 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
 
   const handleFilterBranch = () => {
     const headOfficeName = selectedHeadOffice.split(" ")[1];
-    console.log(headOfficeName);
+    // console.log(headOfficeName);
     const branches = processedBankList.filter((bank) => {
       return bank.headOffice === headOfficeName;
     });
@@ -67,6 +72,7 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
     if (selectedBranch) {
       handleSelectedBranch;
     }
+    console.log(selectedBranch);
   }, [selectedBranch]);
 
   const handleSelectedBankData = (selectedBank, selectedBranch) => {
@@ -151,7 +157,7 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
                     <li
                       className="cursor-pointer p-2 hover:bg-gray-200"
                       key={branch.branchCode}
-                      onClick={() => handleSelectBrnanch(branch.branchOffice)}
+                      onClick={() => handleSelectBrnanch(branch)}
                     >
                       {branch.branchOffice}
                     </li>

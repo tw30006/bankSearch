@@ -3,9 +3,9 @@ import SearchBank from "./components/SearchBank";
 import BankDetail from "./components/BankDetail";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
+import { Routes, Route } from "react-router";
 
 //data現在是一包大資料
-//
 
 function App() {
   const [bankData, setbankData] = useState(null);
@@ -87,17 +87,34 @@ function App() {
     if (selectedBank && processedBankList) {
       handleBankDetail(processedBankList, selectedBank);
     }
+    console.log(selectedBank);
   }, [processedBankList, selectedBank]);
 
   return (
     <>
       <Header />
-      <SearchBank
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <SearchBank
+              headOfficeList={headOfficeList}
+              processedBankList={processedBankList}
+              onSelectedBank={handleSelectedBank}
+            />
+          }
+        />
+        <Route
+          path="/"
+          element={<BankDetail bankDetail={selectedBankDetail} />}
+        />
+      </Routes>
+      {/* <SearchBank
         headOfficeList={headOfficeList}
         processedBankList={processedBankList}
         onSelectedBank={handleSelectedBank}
       />
-      <BankDetail bankDetail={selectedBankDetail} />
+      <BankDetail bankDetail={selectedBankDetail} /> */}
     </>
   );
 }
