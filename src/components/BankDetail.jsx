@@ -1,6 +1,11 @@
-const BankDetail = ({ bankDetail }) => {
-  console.log(bankDetail);
-  if (!bankDetail) return;
+const BankDetail = ({ bankDetail, onReset, onCopyUrl }) => {
+  // 確保所有 Hooks 都在條件檢查之前調用
+  if (bankDetail === null) return null;
+
+  const copyCode = (code) => {
+    navigator.clipboard.writeText(code).then(() => {});
+  };
+
   return (
     <>
       <div className="m-auto w-[60%] bg-sky-300/25 px-2 py-3">
@@ -11,7 +16,10 @@ const BankDetail = ({ bankDetail }) => {
         </div>
         <div className="flex items-center mb-3">
           <p className="text-lg me-2">分行代碼：{bankDetail.branchCode}</p>
-          <button className="border border-solid border-sky-700 p-1 text-sky-700 rounded-md hover:text-white hover:bg-sky-700">
+          <button
+            className="border border-solid border-sky-700 p-1 text-sky-700 rounded-md hover:text-white hover:bg-sky-700"
+            onClick={() => copyCode(bankDetail.branchCode)}
+          >
             複製代碼
           </button>
         </div>
@@ -30,10 +38,16 @@ const BankDetail = ({ bankDetail }) => {
         </div>
       </div>
       <div className="flex justify-center my-2">
-        <button className=" border border-solid border-sky-700 p-2 text-sky-700 rounded-md hover:text-white hover:bg-sky-700 me-5">
+        <button
+          className=" border border-solid border-sky-700 p-2 text-sky-700 rounded-md hover:text-white hover:bg-sky-700 me-5"
+          onClick={onReset}
+        >
           重新查詢
         </button>
-        <button className=" border border-solid border-sky-700 p-2 text-sky-700 rounded-md hover:text-white hover:bg-sky-700">
+        <button
+          className=" border border-solid border-sky-700 p-2 text-sky-700 rounded-md hover:text-white hover:bg-sky-700"
+          onClick={onCopyUrl}
+        >
           複製此頁面連結
         </button>
       </div>

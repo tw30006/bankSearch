@@ -1,94 +1,90 @@
 import { useState, useEffect } from "react";
+import { useNavigate, Outlet } from "react-router-dom";
 
+//現在有一個問題是只要input的資料一輸入，整個元件都會重新渲染，導致整個headOfficeList都會跟著一起渲染
 const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
   // console.log(headOfficeList);
-  const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
-  const [selectedBranch, setSelectedBranch] = useState({});
-  const [isOpenHeadOffice, setIsOpenHeadOffice] = useState(false);
-  const [isOpenBranch, setIsOpenBranch] = useState(false);
-  const [filterHeadOffice, setFilterHeadOffice] = useState([]);
   const [filterBranches, setFilterBranches] = useState([]);
+  const [filteredHeadOffices, setFilteredHeadOffices] = useState([]);
+  const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState({
+    branch: "",
+    branchCode: null,
+  });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
 
-  const handleSelectOption = (headOffice) => {
+  const handleSelectedHeadOffice = (headOffice) => {
     setSelectedHeadOffice(`${headOffice.code} ${headOffice.bankName}`);
-    setIsOpenHeadOffice(false);
+    setIsDropdownOpen(false);
+    setSelectedBranch("");
   };
+  //初始化
   useEffect(() => {
-    setFilterHeadOffice(headOfficeList);
+    setFilteredHeadOffices(headOfficeList);
   }, [headOfficeList]);
+
   const handleHeadOfficeList = () => {
-    setIsOpenHeadOffice(!isOpenHeadOffice);
-  };
-
-  const handleSelectBrnanch = (branch) => {
-    console.log(branch);
-
-    setSelectedBranch({
-      branch: branch.branchOffice,
-      branchCode: branch.branchCode,
-    });
-    setIsOpenBranch(false);
+    setIsDropdownOpen(!isDropdownOpen);
   };
   const handleBranchList = () => {
-    setIsOpenBranch(!isOpenBranch);
+    setIsBranchDropdownOpen(!isBranchDropdownOpen);
+  };
+  const handleSelectedBranch = (branch) => {
+    setSelectedBranch((prevState) => ({
+      ...prevState,
+      branch: branch.branchOffice,
+      branchCode: branch.branchCode,
+    }));
+    setIsBranchDropdownOpen(false);
   };
 
-  const handleInputHeadOffice = (e) => {
+  //當我的input需要關鍵字時，下面的li要出現相對應的內容
+  const handleInputKeyword = (e) => {
     const keyword = e.target.value;
-    const normalize = keyword.trim().toLowerCase();
-
+    const normalize = keyword.trim();
     setSelectedHeadOffice(keyword);
     const next = headOfficeList.filter((headOffice) => {
       return (
         headOffice.bankName.includes(normalize) ||
-        headOffice.code.includes(normalize)
+        String(headOffice.code).includes(normalize)
       );
     });
-    setFilterHeadOffice(next);
-    setIsOpenHeadOffice(true);
+    setFilteredHeadOffices(next);
+    setIsDropdownOpen(true);
   };
 
-  const handleFilterBranch = () => {
-    const headOfficeName = selectedHeadOffice.split(" ")[1];
-    // console.log(headOfficeName);
-    const branches = processedBankList.filter((bank) => {
-      return bank.headOffice === headOfficeName;
-    });
-    return branches;
+  const handleFilterBranches = (processedBankList) => {
+    const headOfficeCode = selectedHeadOffice.split(" ")[0];
+    return processedBankList.filter(
+      (bank) => bank.headOfficeCode === headOfficeCode
+    );
   };
   useEffect(() => {
     if (selectedHeadOffice) {
-      setFilterBranches(handleFilterBranch);
-      setIsOpenBranch(true);
+      setFilterBranches(handleFilterBranches(processedBankList));
+      setIsBranchDropdownOpen(true);
     }
-    console.log(filterBranches);
   }, [selectedHeadOffice]);
 
-  const handleSelectedBranch = () => {
-    setSelectedBranch(selectedBranch);
-    setIsOpenBranch(false);
-  };
-  useEffect(() => {
-    if (selectedBranch) {
-      handleSelectedBranch;
-    }
-    console.log(selectedBranch);
-  }, [selectedBranch]);
-
-  const handleSelectedBankData = (selectedBank, selectedBranch) => {
-    const headOfficeCode = selectedBank.split(" ")[0];
-    const headOfficeName = selectedBank.split(" ")[1];
+  const handleSaveBankData = (selectedHeadOffice, selectedBranch) => {
+    if (!selectedHeadOffice || !selectedBranch) return;
+    const headOfficeName = selectedHeadOffice.split(" ")[1];
+    const headOfficeCode = selectedHeadOffice.split(" ")[0];
+    console.log(headOfficeName, headOfficeCode, selectedBranch.branch);
     onSelectedBank({
-      headOffice: headOfficeName,
+      headOfficeName: headOfficeName,
       headOfficeCode: headOfficeCode,
-      branch: selectedBranch,
+      branch: selectedBranch.branch,
+      branchCode: selectedBranch.branchCode,
     });
   };
   useEffect(() => {
-    if (selectedHeadOffice && selectedBranch) {
-      handleSelectedBankData(selectedHeadOffice, selectedBranch);
+    if (selectedBranch) {
+      handleSaveBankData(selectedHeadOffice, selectedBranch);
     }
   }, [selectedBranch]);
+
   return (
     <>
       <div className="flex justify-center my-3">
@@ -101,25 +97,27 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
                 placeholder="請輸入關鍵字或銀行代碼..."
                 id="bankName"
                 value={selectedHeadOffice}
-                onChange={(e) => handleInputHeadOffice(e)}
-                onFocus={() => setIsOpenHeadOffice(true)}
+                onChange={(e) => {
+                  handleInputKeyword(e);
+                }}
+                onFocus={() => setIsDropdownOpen(true)}
               />
               <span
                 className="material-symbols-outlined"
                 onClick={() => handleHeadOfficeList()}
               >
-                {isOpenHeadOffice ? "stat_1" : "stat_minus_1"}
+                {isDropdownOpen ? "stat_1" : "stat_minus_1"}
               </span>
             </div>
-            {isOpenHeadOffice && (
+            {isDropdownOpen && (
               <ul className="z-2 absolute mt-1 w-full rounded bg-gray-50 ring-1 ring-gray-300 max-h-60 overflow-y-auto">
                 <li className="w-full rounded bg-gray-50 text-center py-2"></li>
-                {filterHeadOffice.map((headOffice) => {
+                {filteredHeadOffices.map((headOffice) => {
                   return (
                     <li
                       className="cursor-pointer p-2 hover:bg-gray-200"
                       key={headOffice.code}
-                      onClick={() => handleSelectOption(headOffice)}
+                      onClick={() => handleSelectedHeadOffice(headOffice)}
                     >
                       <span className="mr-2">{headOffice.code}</span>
                       {headOffice.bankName}
@@ -140,24 +138,25 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
               <input
                 className="w-full outline-none"
                 id="branchName"
-                value={selectedBranch}
+                value={selectedBranch?.branch || ""}
+                readOnly
               />
               <span
                 className="material-symbols-outlined"
                 onClick={() => handleBranchList()}
               >
-                {isOpenBranch ? "stat_1" : "stat_minus_1"}
+                {isBranchDropdownOpen ? "stat_1" : "stat_minus_1"}
               </span>
             </div>
 
-            {isOpenBranch && (
+            {isBranchDropdownOpen && (
               <ul className="z-2 absolute mt-1 w-full rounded bg-gray-50 ring-1 ring-gray-300 max-h-60 overflow-y-auto">
                 {filterBranches.map((branch) => {
                   return (
                     <li
                       className="cursor-pointer p-2 hover:bg-gray-200"
-                      key={branch.branchCode}
-                      onClick={() => handleSelectBrnanch(branch)}
+                      key={branch.branchOffice}
+                      onClick={() => handleSelectedBranch(branch)}
                     >
                       {branch.branchOffice}
                     </li>
@@ -168,6 +167,7 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
           </div>
         </section>
       </div>
+      <Outlet />
     </>
   );
 };
