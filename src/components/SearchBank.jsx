@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
-//現在有一個問題是只要input的資料一輸入，整個元件都會重新渲染，導致整個headOfficeList都會跟著一起渲染
-const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
-  // console.log(headOfficeList);
+const searchBank = ({
+  headOfficeList,
+  processedBankList,
+  onSelectedBank,
+  selectedHeadOffice,
+  setSelectedHeadOffice,
+  selectedBranch,
+  setSelectedBranch,
+}) => {
   const [filterBranches, setFilterBranches] = useState([]);
   const [filteredHeadOffices, setFilteredHeadOffices] = useState([]);
-  const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
-  const [selectedBranch, setSelectedBranch] = useState({
-    branch: "",
-    branchCode: null,
-  });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
 
   const handleSelectedHeadOffice = (headOffice) => {
     setSelectedHeadOffice(`${headOffice.code} ${headOffice.bankName}`);
     setIsDropdownOpen(false);
-    setSelectedBranch("");
   };
   //初始化
   useEffect(() => {
@@ -71,7 +71,7 @@ const searchBank = ({ headOfficeList, processedBankList, onSelectedBank }) => {
     if (!selectedHeadOffice || !selectedBranch) return;
     const headOfficeName = selectedHeadOffice.split(" ")[1];
     const headOfficeCode = selectedHeadOffice.split(" ")[0];
-    console.log(headOfficeName, headOfficeCode, selectedBranch.branch);
+    // console.log(headOfficeName, headOfficeCode, selectedBranch.branch);
     onSelectedBank({
       headOfficeName: headOfficeName,
       headOfficeCode: headOfficeCode,

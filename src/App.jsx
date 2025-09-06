@@ -13,9 +13,13 @@ function App() {
   const [headOfficeList, setHeadOfficeList] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
   const [bankDetail, setBankDetail] = useState(null);
+  const [selectedHeadOffice, setSelectedHeadOffice] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState({
+    branch: "",
+    branchCode: null,
+  });
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location);
   //這裡處理csv轉json
   const getBankData = () => {
     Papa.parse("/data.csv", {
@@ -58,13 +62,12 @@ function App() {
   useEffect(() => {
     if (bankData) {
       const processedData = defineBankData();
-      console.log(processedData);
+
       setProcessedBankList(processedData);
       const uniqueMap = new Map();
       processedData.forEach((bank) => {
         return uniqueMap.set(bank.headOfficeCode, bank.headOffice);
       });
-      // console.log(uniqueMap);
 
       const headOfficeArr = Array.from(uniqueMap).flatMap(([code, bankName]) =>
         bankName !== "" ? [{ code, bankName }] : []
@@ -80,7 +83,6 @@ function App() {
       const urlMatch = location.pathname.match(
         /^\/([^\/]+)\/([^\/]+)\/(.+)\.html$/
       );
-      console.log("URL Match:", urlMatch);
 
       // 檢查 URL 是否匹配預期格式
       if (urlMatch) {
@@ -92,15 +94,13 @@ function App() {
             bank.branchCode === branchCode
         );
 
-        console.log("Found Bank:", foundBank);
-
         // 如果找到銀行，可以設置相關狀態
         if (foundBank) {
           setSelectedBank(foundBank);
         }
       }
     }
-  }, [location.pathname, processedBankList]); // 添加 processedBankList 到依賴數組
+  }, [location.pathname, processedBankList]);
 
   //處理被選中的銀行，從SearchBank傳值出來
   const handleSelectedBank = (bank) => {
@@ -112,10 +112,8 @@ function App() {
       navigate(url);
     }
   };
-  console.log(selectedBank);
 
   const handleBankDetail = (processedBankList) => {
-    console.log(processedBankList);
     const bankDetail = processedBankList.find(
       (bank) =>
         bank.headOfficeCode === selectedBank.headOfficeCode &&
@@ -130,10 +128,9 @@ function App() {
     }
   }, [processedBankList, selectedBank]);
 
-  //處理被選中的分行
-
-  //處理從BankDetail的重置按鈕
   const handleReset = () => {
+    setSelectedHeadOffice("");
+    setSelectedBranch({});
     navigate("/");
   };
 
@@ -160,6 +157,11 @@ function App() {
               headOfficeList={headOfficeList}
               processedBankList={processedBankList}
               onSelectedBank={handleSelectedBank}
+              onReset={handleReset}
+              selectedHeadOffice={selectedHeadOffice}
+              setSelectedHeadOffice={setSelectedHeadOffice}
+              selectedBranch={selectedBranch}
+              setSelectedBranch={setSelectedBranch}
             />
           }
         >
